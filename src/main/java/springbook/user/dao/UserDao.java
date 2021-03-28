@@ -3,25 +3,35 @@ package springbook.user.dao;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import springbook.user.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserDao {
-    private ConnectionMaker connectionMaker;
+    // 1. 생성자를 이용하는 방법
+//    private ConnectionMaker connectionMaker;
+//
+//    public void setConnectionMaker(ConnectionMaker connectionMaker) {
+////        DI(의존관계 주입) = Dependency Injection
+//        this.connectionMaker = connectionMaker;
+//
+////        DL(의존관계 검색) = Dependency Lookup
+////        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+////        this.connectionMaker = context.getBean("connectionMaker", ConnectionMaker.class);
+//    }
 
-    public void setConnectionMaker(ConnectionMaker connectionMaker) {
-//        DI(의존관계 주입) = Dependency Injection
-        this.connectionMaker = connectionMaker;
+    // 2. 이미 존재하는 DataSource를 이용
+    private DataSource dataSource;
 
-//        DL(의존관계 검색) = Dependency Lookup
-//        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
-//        this.connectionMaker = context.getBean("connectionMaker", ConnectionMaker.class);
+    public void setDataSource(DataSource dataSource){
+        this.dataSource = dataSource;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        Connection c = connectionMaker.makeConnection();
+//        Connection c = connectionMaker.makeConnection();
+        Connection c = dataSource.getConnection();
 
         PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
         ps.setString(1, user.getId());
@@ -35,7 +45,8 @@ public class UserDao {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
-        Connection c = connectionMaker.makeConnection();
+//        Connection c = connectionMaker.makeConnection();
+        Connection c = dataSource.getConnection();
 
         PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
         ps.setString(1, id);

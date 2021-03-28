@@ -9,6 +9,10 @@ import java.sql.SQLException;
 
 public class UserDaoTest {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        // 1. DaoFactory를 이용한 애플리케이션 컨텍스트
+//        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+
+        // 2. XML을 이용한 애플리케이션 컨텍스트
         ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
         UserDao dao = context.getBean("userDao", UserDao.class);
 
