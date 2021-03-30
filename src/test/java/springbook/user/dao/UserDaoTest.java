@@ -1,5 +1,6 @@
 package springbook.user.dao;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -7,8 +8,13 @@ import springbook.user.domain.User;
 
 import java.sql.SQLException;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+
 public class UserDaoTest {
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+    @Test
+    public void addAndGet() throws ClassNotFoundException, SQLException {
         // 1. DaoFactory를 이용한 애플리케이션 컨텍스트
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 
@@ -22,17 +28,16 @@ public class UserDaoTest {
         User user = new User();
         user.setId("moong2");
         user.setName("박뭉");
-        user.setPassword("iwant");
+        user.setPassword("I'm_moong2");
 
         dao.add(user);
 
         System.out.println(user.getId() + " 등록 성공");
 
         User user2 = dao.get(user.getId());
-        System.out.println(user2.getName());
-        System.out.println(user2.getPassword());
 
-        System.out.println(user2.getId() + " 조회 성공");
+        assertThat(user2.getName(), is(user.getName()));
+        assertThat(user2.getPassword(), is(user.getPassword()));
     }
 
     public static void 직접_생성한_DaoFactory_오브젝트_동등성_비교() {
