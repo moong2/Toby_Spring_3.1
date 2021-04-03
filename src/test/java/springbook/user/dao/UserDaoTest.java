@@ -2,20 +2,32 @@ package springbook.user.dao;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-
+//1. Spring을 이용한 Test
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(locations = "/test-applicationContext.xml")
 public class UserDaoTest {
+//    @Autowired
+//    private ApplicationContext context;
+//    @Autowired
     private UserDao dao;
+
     private User user1;
     private User user2;
     private User user3;
@@ -26,8 +38,14 @@ public class UserDaoTest {
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 
         // 2. XML을 이용한 애플리케이션 컨텍스트
-        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
-        this.dao = context.getBean("userDao", UserDao.class);
+//        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
+
+//        this.dao = context.getBean("userDao", UserDao.class);
+
+        // 컨테이너 없는 DI 테스트
+        dao = new UserDao();
+        DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "root", "min20617", true);
+        dao.setDataSource(dataSource);
 
         this.user1 = new User("moong2", "박뭉", "I'm_moong2");
         this.user2 = new User("chicken", "치킨", "bhc");
