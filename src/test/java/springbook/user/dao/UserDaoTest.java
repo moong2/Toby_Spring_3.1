@@ -20,12 +20,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 //1. Spring을 이용한 Test
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(locations = "/test-applicationContext.xml")
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/test-applicationContext.xml")
 public class UserDaoTest {
 //    @Autowired
 //    private ApplicationContext context;
-//    @Autowired
+    @Autowired
     private UserDao dao;
 
     private User user1;
@@ -37,15 +37,15 @@ public class UserDaoTest {
         // 1. DaoFactory를 이용한 애플리케이션 컨텍스트
 //        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 
-        // 2. XML을 이용한 애플리케이션 컨텍스트
+//         2. XML을 이용한 애플리케이션 컨텍스트
 //        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
 
 //        this.dao = context.getBean("userDao", UserDao.class);
 
         // 컨테이너 없는 DI 테스트
-        dao = new UserDao();
-        DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "root", "min20617", true);
-        dao.setDataSource(dataSource);
+//        dao = new UserDao();
+//        DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "root", "min20617", true);
+//        dao.setDataSource(dataSource);
 
         this.user1 = new User("moong2", "박뭉", "I'm_moong2");
         this.user2 = new User("chicken", "치킨", "bhc");
@@ -108,7 +108,6 @@ public class UserDaoTest {
 
     @Test(expected= EmptyResultDataAccessException.class)
     public void getUserFailure() throws ClassNotFoundException, SQLException {
-
         dao.deleteAll();
         assertThat(dao.getCount(), is(0));
 

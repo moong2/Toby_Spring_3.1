@@ -1,5 +1,6 @@
 package springbook.user.dao;
 
+import jdk.nashorn.internal.scripts.JD;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.domain.User;
@@ -23,12 +24,26 @@ public class UserDao {
     // 2. 이미 존재하는 DataSource를 이용
     private DataSource dataSource;
 
+    private JdbcContext jdbcContext;
+
     public void setDataSource(DataSource dataSource){
+        this.jdbcContext = new JdbcContext();
+
+        this.jdbcContext.setDataSource(dataSource);
+
         this.dataSource = dataSource;
     }
 
+
+    // jdbcContext로 try/catch/finally 구문 실행
+//    private JdbcContext jdbcContext;
+//
+//    public void setJdbcContext(JdbcContext jdbcContext) {
+//        this.jdbcContext = jdbcContext;
+//    }
+
     public void add(final User user) throws ClassNotFoundException, SQLException {
-        jdbcContextWithStatementStrategy(
+        this.jdbcContext.workWithStatementStrategy(
                 new StatementStrategy() {
                     @Override
                     public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
@@ -70,7 +85,7 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        jdbcContextWithStatementStrategy(
+        this.jdbcContext.workWithStatementStrategy(
                 new StatementStrategy() {
                     @Override
                     public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
@@ -111,36 +126,6 @@ public class UserDao {
                 }
             }
             if(c != null) {
-                try{
-                    c.close();
-                }catch(SQLException e){
-
-                }
-            }
-        }
-    }
-
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException{
-        Connection c = null;
-        PreparedStatement ps = null;
-
-        try {
-            c = dataSource.getConnection();
-
-            ps = stmt.makePreparedStatement(c);
-
-            ps.executeUpdate();
-        } catch(SQLException e){
-            throw e;
-        } finally {
-            if(ps != null) {
-                try{
-                    ps.close();
-                }catch(SQLException e){
-
-                }
-            }
-            if(c != null){
                 try{
                     c.close();
                 }catch(SQLException e){
