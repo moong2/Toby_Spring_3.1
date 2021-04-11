@@ -23,7 +23,10 @@
 <!--    </bean>-->
 
     <bean id="userDao" class="springbook.user.dao.UserDao">
-        <property name="dataSource" ref="dataSource" />
+        <!-- -1- dataSource를 빈으로 등록 -->
+        <!--        <property name="dataSource" ref="dataSource" />-->
+        <!-- -2- JdbcTemplate을 빈으로 등록 -->
+        <property name="jdbcTemplate" ref="dataSource" />
 <!--        <property name="jdbcContext" ref="jdbcContext" />-->
     </bean>
 </beans>

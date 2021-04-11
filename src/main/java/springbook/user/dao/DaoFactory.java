@@ -17,7 +17,7 @@ public class DaoFactory {
 //        userDao.setConnectionMaker(connectionMaker());
 
         // 2. DataSource 사용
-        userDao.setDataSource(dataSource());
+        userDao.setJdbcTemplate(dataSource());
 
         return userDao;
     }
