@@ -1,5 +1,6 @@
 package springbook.user.dao;
 
+import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import jdk.nashorn.internal.scripts.JD;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.DataAccessException;
@@ -50,11 +51,11 @@ public class UserDao {
 
 
     // jdbcContext로 try/catch/finally 구문 실행
-//    private JdbcContext jdbcContext;
-//
-//    public void setJdbcContext(JdbcContext jdbcContext) {
-//        this.jdbcContext = jdbcContext;
-//    }
+    private JdbcContext jdbcContext;
+
+    public void setJdbcContext(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
+    }
 
     private RowMapper<User> userMapper =
             new RowMapper<User>() {
@@ -69,14 +70,21 @@ public class UserDao {
             };
 
 
-    public void add(final User user) throws ClassNotFoundException, SQLException {
-        // 1) jdbcContext 사용 방식
-//        this.jdbcContext.excuteSqlAndBindingParameter("insert into users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
-        // 2) JdbcTemplate 내장 콜백 사용 방식
-        this.jdbcTemplate.update("INSERT INTO users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
+    public void add(final User user) {
+        try{
+            // 1) jdbcContext 사용 방식
+            this.jdbcContext.excuteSqlAndBindingParameter("insert into users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
+            // 2) JdbcTemplate 내장 콜백 사용 방식
+//            this.jdbcTemplate.update("INSERT INTO users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
+        } catch(SQLException e) {
+            if(e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
+                throw new DuplicateUserIdException(e);
+            }
+            else {throw new RuntimeException(e);}
+        }
     }
 
-    public User get(String id) throws ClassNotFoundException, SQLException {
+    public User get(String id) {
         // 1)
 ////        Connection c = connectionMaker.makeConnection();
 //        Connection c = dataSource.getConnection();
@@ -107,11 +115,11 @@ public class UserDao {
                 new Object[]{id}, this.userMapper);
     }
 
-    public List<User> getAll() throws SQLException {
+    public List<User> getAll() {
         return this.jdbcTemplate.query("SELECT * FROM users ORDER BY id", this.userMapper);
     }
 
-    public void deleteAll() throws SQLException {
+    public void deleteAll() {
         // 1) jdbcContext 사용 방식
 //        this.jdbcContext.excuteSql("delete from users");
         // 2) spring에서 제공하는 JdbcTemplate 사용 방식
@@ -128,7 +136,7 @@ public class UserDao {
         this.jdbcTemplate.update("DELETE FROM users");
     }
 
-    public int getCount() throws SQLException {
+    public int getCount() {
 
         // 1)
 //        Connection c = null;
