@@ -52,11 +52,11 @@ public class UserDaoJdbc implements UserDao{
 
 
     // jdbcContext로 try/catch/finally 구문 실행
-    private JdbcContext jdbcContext;
-
-    public void setJdbcContext(JdbcContext jdbcContext) {
-        this.jdbcContext = jdbcContext;
-    }
+//    private JdbcContext jdbcContext;
+//
+//    public void setJdbcContext(JdbcContext jdbcContext) {
+//        this.jdbcContext = jdbcContext;
+//    }
 
     private RowMapper<User> userMapper =
             new RowMapper<User>() {

@@ -32,7 +32,7 @@ public class UserDaoTest {
     @Autowired
     private UserDao dao;
     @Autowired
-    DataSource dataSource;
+    private DataSource dataSource;
 
     private User user1;
     private User user2;
@@ -153,7 +153,7 @@ public class UserDaoTest {
 
 //    아래 두 테스트는 NoClassDefFoundError로 인해서 실행되지 않음
 
-    @Test(expected = SQLException.class)
+    @Test(expected = DataAccessException.class)
     public void duplicateKey() {
         dao.deleteAll();
 
