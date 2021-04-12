@@ -9,9 +9,9 @@ import javax.sql.DataSource;
 @Configuration
 public class DaoFactory {
     @Bean
-    public UserDao userDao() {
+    public UserDaoJdbc userDao() {
 
-        UserDao userDao = new UserDao();
+        UserDaoJdbc userDao = new UserDaoJdbc();
 
         // 1. ConnectionMaker 인터페이스 사용
 //        userDao.setConnectionMaker(connectionMaker());

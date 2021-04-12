@@ -6,9 +6,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.domain.User;
@@ -28,6 +31,8 @@ public class UserDaoTest {
 //    private ApplicationContext context;
     @Autowired
     private UserDao dao;
+    @Autowired
+    DataSource dataSource;
 
     private User user1;
     private User user2;
@@ -44,9 +49,9 @@ public class UserDaoTest {
 //        this.dao = context.getBean("userDao", UserDao.class);
 
         // 컨테이너 없는 DI 테스트
-//        dao = new UserDao();
+//        dao = new UserDaoJdbc();
 //        DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "root", "min20617", true);
-//        dao.setDataSource(dataSource);
+//        ((UserDaoJdbc)dao).setDataSource(dataSource);
 
         this.user1 = new User("moong2", "박뭉", "I'm_moong2");
         this.user2 = new User("chicken", "치킨", "bhc");
@@ -54,7 +59,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void addAndGet() throws ClassNotFoundException, SQLException {
+    public void addAndGet() {
 
         직접_생성한_DaoFactory_오브젝트_동등성_비교();
         스프링컨텍스트로부터_가져온_오브젝트_동등성_비교();
@@ -76,8 +81,8 @@ public class UserDaoTest {
     }
     public static void 직접_생성한_DaoFactory_오브젝트_동등성_비교() {
         DaoFactory factory = new DaoFactory();
-        UserDao dao1 = factory.userDao();
         UserDao dao2 = factory.userDao();
+        UserDao dao1 = factory.userDao();
 
         System.out.println(dao1);
         System.out.println(dao2);
@@ -144,5 +149,30 @@ public class UserDaoTest {
         assertThat(user1.getId(), is(user2.getId()));
         assertThat(user2.getName(), is(user2.getName()));
         assertThat(user3.getPassword(), is(user3.getPassword()));
+    }
+
+//    아래 두 테스트는 NoClassDefFoundError로 인해서 실행되지 않음
+
+    @Test(expected = SQLException.class)
+    public void duplicateKey() {
+        dao.deleteAll();
+
+        dao.add(user1);
+        dao.add(user1);
+    }
+
+    @Test
+    public void sqlExceptionTranslate() {
+        dao.deleteAll();
+
+        try{
+            dao.add(user1);
+            dao.add(user1);
+        }
+        catch(DuplicateKeyException ex){
+            SQLException sqlEx = (SQLException)ex.getRootCause();
+            SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+            assertThat(set.translate(null, null, sqlEx), is(DuplicateKeyException.class));
+        }
     }
 }

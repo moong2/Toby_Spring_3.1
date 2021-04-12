@@ -6,7 +6,7 @@
 
     <!-- 1. connectionMaker 인터페이스 이용 -->
 <!--    <bean id="connectionMaker" class="springbook.user.dao.DConnectionMaker" />-->
-<!--    <bean id="userDao" class="springbook.user.dao.UserDao">-->
+<!--    <bean id="userDao" class="springbook.user.dao.UserDaoJdbcJdbc">-->
 <!--        <property name="connectionMaker" ref="connectionMaker" />-->
 <!--    </bean>-->
 
@@ -22,7 +22,7 @@
 <!--        <property name="dataSource" ref="dataSource" />-->
 <!--    </bean>-->
 
-    <bean id="userDao" class="springbook.user.dao.UserDao">
+    <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
         <!-- -1- dataSource를 빈으로 등록 -->
         <!--        <property name="dataSource" ref="dataSource" />-->
         <!-- -2- JdbcTemplate을 빈으로 등록 -->
