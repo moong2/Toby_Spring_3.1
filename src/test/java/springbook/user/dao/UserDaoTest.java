@@ -18,11 +18,9 @@ import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 import javax.sql.DataSource;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;

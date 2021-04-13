@@ -1,9 +1,7 @@
 package springbook.user.domain;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.GregorianCalendar;
 
 public class User {
     String id;
