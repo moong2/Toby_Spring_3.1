@@ -21,6 +21,9 @@
 <!--    <bean id="jdbcContext" class="springbook.user.dao.JdbcContext">-->
 <!--        <property name="dataSource" ref="dataSource" />-->
 <!--    </bean>-->
+    <bean id="userLevelUpgradePolicy" class="springbook.user.service.UserService">
+        <property name="userDao" ref="userDao" />
+    </bean>
 
     <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
         <!-- -1- dataSource를 빈으로 등록 -->

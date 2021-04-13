@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 import javax.sql.DataSource;
@@ -66,13 +67,17 @@ public class UserDaoJdbc implements UserDao{
                     user.setId(resultSet.getString("id"));
                     user.setName(resultSet.getString("name"));
                     user.setPassword(resultSet.getString("password"));
+                    user.setLevel(Level.valueOf(resultSet.getInt("level")));
+                    user.setLogin(resultSet.getInt("login"));
+                    user.setRecommend(resultSet.getInt("recommend"));
+                    user.setLastUpgraded(resultSet.getTimestamp("lastUpgraded"));
                     return user;
                 }
             };
 
 
     public void add(final User user){
-        this.jdbcTemplate.update("INSERT INTO users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
+        this.jdbcTemplate.update("INSERT INTO users(id, name, password, level, login, recommend, lastUpgraded) values(?,?,?,?,?,?,?)", user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getLastUpgraded());
     }
 
     public User get(String id) {
@@ -184,5 +189,12 @@ public class UserDaoJdbc implements UserDao{
 
         // 3) JdbcTemplate 내장 콜백 사용
         return this.jdbcTemplate.queryForInt("SELECT COUNT(*) FROM users");
+    }
+
+    @Override
+    public void update(User user1) {
+        this.jdbcTemplate.update(
+                "update users set name = ?, password = ?, level = ?, login = ?, recommend = ?, lastUpgraded = ? where id = ?", user1.getName(), user1.getPassword(), user1.getLevel().intValue(), user1.getLogin(), user1.getRecommend(), user1.getLastUpgraded(), user1.getId()
+        );
     }
 }
