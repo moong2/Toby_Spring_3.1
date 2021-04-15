@@ -4,9 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+import springbook.mail.MailSender;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
@@ -14,6 +18,7 @@ import springbook.user.domain.User;
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,25 +37,32 @@ public class UserServiceTest {
     UserDao userDao;
     @Autowired
     PlatformTransactionManager transactionManager;
+    @Autowired
+    MailSender mailSender;
 
     List<User> users;
 
     @Before
     public void setUp() {
         users = Arrays.asList(
-                new User("moong0", "박뭉영", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0, Timestamp.valueOf(LocalDateTime.now())),
-                new User("moong1", "박뭉일", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, Timestamp.valueOf(LocalDateTime.now())),
-                new User("moong2", "박뭉이", "p3", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD-1, Timestamp.valueOf(LocalDateTime.now())),
-                new User("moong3", "박뭉삼", "p4", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD, Timestamp.valueOf(LocalDateTime.now())),
-                new User("moong4", "박뭉사", "p5", Level.GOLD, 100, 100, Timestamp.valueOf(LocalDateTime.now()))
+                new User("moong0", "박뭉영", "p1", "clapmean@gmail.com", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, 0, Timestamp.valueOf(LocalDateTime.now())),
+                new User("moong1", "박뭉일", "p2", "clapmean@gmail.com", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, Timestamp.valueOf(LocalDateTime.now())),
+                new User("moong2", "박뭉이", "p3", "clapmean@gmail.com", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD-1, Timestamp.valueOf(LocalDateTime.now())),
+                new User("moong3", "박뭉삼", "p4", "clapmean@gmail.com", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD, Timestamp.valueOf(LocalDateTime.now())),
+                new User("moong4", "박뭉사", "p5", "clapmean@gmail.com", Level.GOLD, 100, 100, Timestamp.valueOf(LocalDateTime.now()))
         );
         userService.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
+        userService.setMailSender(mailSender);
     }
 
     @Test
+    @DirtiesContext
     public void upgradeLevels() throws Exception{
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
+
+        MockMailSender mockMailSender = new MockMailSender();
+        userService.setMailSender(mockMailSender);
 
         userService.upgradeLevels();
 
@@ -59,6 +71,28 @@ public class UserServiceTest {
         checkLevel(users.get(2), false);
         checkLevel(users.get(3), true);
         checkLevel(users.get(4), false);
+
+        List<String> request = mockMailSender.getRequests();
+        assertThat(request.size(), is(2));
+        assertThat(request.get(0), is(users.get(1).getEmail()));
+        assertThat(request.get(1), is(users.get(3).getEmail()));
+    }
+    static class MockMailSender implements MailSender {
+        private List<String> requests = new ArrayList<String>();
+
+        public List<String> getRequests() {
+            return requests;
+        }
+
+        @Override
+        public void send(SimpleMailMessage simpleMailMessage) throws MailException {
+            requests.add(simpleMailMessage.getTo()[0]);
+        }
+
+        @Override
+        public void send(SimpleMailMessage[] simpleMailMessages) throws MailException {
+
+        }
     }
     public void checkLevel(User user, boolean upgraded) {
         User userUpdate = userDao.get(user.getId());
@@ -93,6 +127,7 @@ public class UserServiceTest {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
+        testUserService.setMailSender(mailSender);
         testUserService.setTransactionManager(transactionManager);
 
         userDao.deleteAll();
@@ -100,8 +135,7 @@ public class UserServiceTest {
 
         try {
             testUserService.upgradeLevels();
-            fail("TestUserServiceException expected");
-        }
+            fail("TestUserServiceException expected"); }
         catch(TestUserServiceException e) {
         }
 

@@ -56,9 +56,9 @@ public class UserDaoTest {
 //        DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "root", "min20617", true);
 //        ((UserDaoJdbc)dao).setDataSource(dataSource);
 
-        this.user1 = new User("moong2", "박뭉", "I'm_moong2", Level.BASIC, 1, 0, Timestamp.valueOf(LocalDateTime.now()));
-        this.user2 = new User("chicken", "치킨", "bhc", Level.SILVER, 55, 10, Timestamp.valueOf(LocalDateTime.now()));
-        this.user3 = new User("pizza", "피자", "domino", Level.GOLD, 100, 40, Timestamp.valueOf(LocalDateTime.now()));
+        this.user1 = new User("moong2", "박뭉", "I'm_moong2", "clapmean@gmail.com", Level.BASIC, 1, 0, Timestamp.valueOf(LocalDateTime.now()));
+        this.user2 = new User("chicken", "치킨", "bhc", "clapmean@gmail.com", Level.SILVER, 55, 10, Timestamp.valueOf(LocalDateTime.now()));
+        this.user3 = new User("pizza", "피자", "domino", "clapmean@gmail.com", Level.GOLD, 100, 40, Timestamp.valueOf(LocalDateTime.now()));
     }
 
     @Test
@@ -150,6 +150,7 @@ public class UserDaoTest {
         assertThat(user1.getId(), is(user2.getId()));
         assertThat(user2.getName(), is(user2.getName()));
         assertThat(user1.getPassword(), is(user2.getPassword()));
+        assertThat(user1.getEmail(), is(user2.getEmail()));
         assertThat(user1.getLevel(), is(user2.getLevel()));
         assertThat(user1.getLogin(), is(user2.getLogin()));
         assertThat(user1.getRecommend(), is(user2.getRecommend()));
@@ -177,7 +178,7 @@ public class UserDaoTest {
 
 //    아래 두 테스트는 NoClassDefFoundError로 인해서 실행되지 않음
 
-    @Test(expected = DataAccessException.class)
+    @Test
     public void duplicateKey() {
         dao.deleteAll();
 
