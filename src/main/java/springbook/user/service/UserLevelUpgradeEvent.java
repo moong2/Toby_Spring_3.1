@@ -3,8 +3,8 @@ package springbook.user.service;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
-import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static springbook.user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
+import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static springbook.user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
 public class UserLevelUpgradeEvent implements UserLevelUpgradePolicy{
     @Override

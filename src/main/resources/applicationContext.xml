@@ -4,18 +4,18 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="userService" class="springbook.user.service.UserService">
-        <property name="userDao" ref="userDao" />
+    <bean id="userService" class="springbook.user.service.UserServiceTx">
         <property name="transactionManager" ref="transactionManger" />
+        <property name="userService" ref="userServiceImpl" />
     </bean>
-
     <bean id="transactionManger" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
-
-    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-        <property name="host" value="mail.sever.com" />
+    <bean id="userServiceImpl" class="springbook.user.service.UserServiceImpl">
+        <property name="userDao" ref="userDao" />
+        <property name="mailSender" ref="mailSender" />
     </bean>
+    <bean id="mailSender" class="springbook.user.service.DummyMailSender" />
 
     <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
         <!-- -1- dataSource를 빈으로 등록 -->

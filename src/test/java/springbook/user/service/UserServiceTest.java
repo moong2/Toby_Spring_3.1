@@ -15,7 +15,6 @@ import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,14 +24,16 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static springbook.user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
+import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static springbook.user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/test-applicationContext.xml")
 public class UserServiceTest {
     @Autowired
     UserService userService;
+    @Autowired
+    UserServiceImpl userServiceImpl;
     @Autowired
     UserDao userDao;
     @Autowired
@@ -51,8 +52,8 @@ public class UserServiceTest {
                 new User("moong3", "박뭉삼", "p4", "clapmean@gmail.com", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD, Timestamp.valueOf(LocalDateTime.now())),
                 new User("moong4", "박뭉사", "p5", "clapmean@gmail.com", Level.GOLD, 100, 100, Timestamp.valueOf(LocalDateTime.now()))
         );
-        userService.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
-        userService.setMailSender(mailSender);
+        userServiceImpl.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
+        userServiceImpl.setMailSender(mailSender);
     }
 
     @Test
@@ -62,7 +63,7 @@ public class UserServiceTest {
         for(User user : users) userDao.add(user);
 
         MockMailSender mockMailSender = new MockMailSender();
-        userService.setMailSender(mockMailSender);
+        userServiceImpl.setMailSender(mockMailSender);
 
         userService.upgradeLevels();
 
@@ -124,24 +125,27 @@ public class UserServiceTest {
 
     @Test
     public void upgradeAllOrNothing() throws Exception{
-        UserService testUserService = new TestUserService(users.get(3).getId());
+        TestUserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
         testUserService.setMailSender(mailSender);
-        testUserService.setTransactionManager(transactionManager);
+
+        UserServiceTx txUserService = new UserServiceTx();
+        txUserService.setTransactionManager(transactionManager);
+        txUserService.setUserService(testUserService);
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
         try {
-            testUserService.upgradeLevels();
+            txUserService.upgradeLevels();
             fail("TestUserServiceException expected"); }
         catch(TestUserServiceException e) {
         }
 
         checkLevel(users.get(1), false);
     }
-    static class TestUserService extends UserService {
+    static class TestUserService extends UserServiceImpl {
         private String id;
 
         private TestUserService(String id) {this.id = id;}
