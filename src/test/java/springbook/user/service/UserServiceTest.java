@@ -38,7 +38,9 @@ public class UserServiceTest {
     @Autowired
     UserService userService;
     @Autowired
-    UserServiceImpl userServiceImpl;
+    UserService testUserService;
+//    @Autowired
+//    UserServiceImpl userServiceImpl;
     @Autowired
     UserDao userDao;
     @Autowired
@@ -59,8 +61,6 @@ public class UserServiceTest {
                 new User("moong3", "박뭉삼", "p4", "clapmean@gmail.com", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD, Timestamp.valueOf(LocalDateTime.now())),
                 new User("moong4", "박뭉사", "p5", "clapmean@gmail.com", Level.GOLD, 100, 100, Timestamp.valueOf(LocalDateTime.now()))
         );
-        userServiceImpl.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
-        userServiceImpl.setMailSender(mailSender);
     }
 
     @Test
@@ -199,38 +199,26 @@ public class UserServiceTest {
     }
 
     @Test
-    @DirtiesContext
     public void upgradeAllOrNothing() throws Exception{
-        TestUserService testUserService = new TestUserService(users.get(3).getId());
-        testUserService.setUserDao(this.userDao);
-        testUserService.userLevelUpgradePolicy = new UserLevelUpgradeEvent();
-        testUserService.setMailSender(mailSender);
-
-        ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", ProxyFactoryBean.class);
-        txProxyFactoryBean.setTarget(testUserService);
-        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
-
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
         try {
-            txUserService.upgradeLevels();
+            this.testUserService.upgradeLevels();
             fail("TestUserServiceException expected");
-        } catch(TestUserServiceException e) {
+        } catch(TestUserServiceImplException e) {
         }
 
         checkLevel(users.get(1), false);
     }
-    static class TestUserService extends UserServiceImpl {
-        private String id;
-
-        private TestUserService(String id) {this.id = id;}
+    static class TestUserServiceImpl extends UserServiceImpl {
+        private String id = "moong3";
 
         @Override
         protected void upgradeLevel(User user) {
-            if(user.getId().equals(this.id)) throw new TestUserServiceException();
+            if(user.getId().equals(this.id)) throw new TestUserServiceImplException();
             super.upgradeLevel(user);
         }
     }
-    static class TestUserServiceException extends RuntimeException{}
+    static class TestUserServiceImplException extends RuntimeException{}
 }

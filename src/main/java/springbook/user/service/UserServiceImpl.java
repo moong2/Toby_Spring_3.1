@@ -37,6 +37,11 @@ public class UserServiceImpl implements UserService{
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
     }
+
+    public void setUserLevelUpgradePolicy(UserLevelUpgradePolicy userLevelUpgradePolicy) {
+        this.userLevelUpgradePolicy = userLevelUpgradePolicy;
+    }
+
     public void setMailSender(MailSender mailSender){
         this.mailSender = mailSender;
     }
