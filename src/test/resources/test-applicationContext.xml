@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-               http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
 <!--    <bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">-->
     <bean id="userService" class="springbook.user.service.UserServiceImpl" >
@@ -25,29 +28,35 @@
         <property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy" />
         <property name="mailSender" ref="mailSender" />
     </bean>
+
     <bean id="transactionManger" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
+
     <bean id="testUserService"
-          class="springbook.user.service.UserServiceTest$TestUserServiceImpl"
+          class="springbook.user.service.UserServiceTest$TestUserService"
           parent="userService" />
+
     <bean id="userServiceImpl" class="springbook.user.service.UserServiceImpl">
         <property name="userDao" ref="userDao" />
         <property name="mailSender" ref="mailSender" />
     </bean>
+
     <bean id="userLevelUpgradePolicy" class="springbook.user.service.UserLevelUpgradeEvent" />
+
     <bean id="mailSender" class="springbook.user.service.DummyMailSender" />
+
     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
+    <aop:config>
+        <!-- pointcut이 여러 개일 경우 -->
+<!--        <aop:pointcut id="transactionPointcut" expression="execution(* *..*ServiceImpl.upgrade*(..))" />-->
+<!--        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut" />-->
+
+        <!-- pointcut이 한 개일 경우 -->
+        <aop:advisor advice-ref="transactionAdvice" pointcut="execution(* *..*ServiceImpl.upgrade*(..))" />
+    </aop:config>
     <bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice" >
         <property name="transactionManager" ref="transactionManger" />
-    </bean>
-    <bean id="transactionPointcut" class="springbook.user.service.NameMatchClassMethodPointcut">
-        <property name="mappedClassName" value="*ServiceImpl" />
-        <property name="mappedName" value="upgrade*" />
-    </bean>
-    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-        <property name="advice" ref="transactionAdvice" />
-        <property name="pointcut" ref="transactionPointcut" />
     </bean>
 
     <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">

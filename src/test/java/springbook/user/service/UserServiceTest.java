@@ -211,7 +211,7 @@ public class UserServiceTest {
 
         checkLevel(users.get(1), false);
     }
-    static class TestUserServiceImpl extends UserServiceImpl {
+    static class TestUserService extends UserServiceImpl {
         private String id = "moong3";
 
         @Override
