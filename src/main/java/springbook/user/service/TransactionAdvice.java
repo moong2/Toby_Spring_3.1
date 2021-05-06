@@ -6,6 +6,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+//TransactionInterceptor를 이용하지 않는 경우
 public class TransactionAdvice implements MethodInterceptor {
     PlatformTransactionManager transactionManager;
 

@@ -1,21 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-               http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx-3.0 xsd">
 
-    <bean id="userService" class="springbook.user.service.UserServiceTx">
-        <property name="transactionManager" ref="transactionManger" />
-        <property name="userService" ref="userServiceImpl" />
+    <!--    <bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">-->
+    <bean id="userService" class="springbook.user.service.UserServiceImpl" >
+        <!--        <property name="target" ref="userServiceImpl" />-->
+
+        <!-- txProxyFactoryBean을 이용 -->
+        <!--        <property name="transactionManager" ref="transactionManger" />-->
+        <!--        <property name="pattern" value="upgradeLevels" />-->
+        <!--        <property name="serviceInterface" value="springbook.user.service.UserService" />-->
+
+        <!-- ProxyFactoryBean을 이용 (spring 제공) -->
+        <!--        <property name="interceptorNames">-->
+        <!--            <list>-->
+        <!--                <value>transactionAdvisor</value>-->
+        <!--            </list>-->
+        <!--        </property>-->
+
+        <!-- DefaultAdvisorAutoProxyCreator 적용 -->
+        <property name="userDao" ref="userDao" />
+        <property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy" />
+        <property name="mailSender" ref="mailSender" />
     </bean>
+
     <bean id="transactionManger" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
+
+    <bean id="testUserService"
+          class="springbook.user.service.UserServiceTest$TestUserService"
+          parent="userService" />
+
     <bean id="userServiceImpl" class="springbook.user.service.UserServiceImpl">
         <property name="userDao" ref="userDao" />
         <property name="mailSender" ref="mailSender" />
     </bean>
+
+    <bean id="userLevelUpgradePolicy" class="springbook.user.service.UserLevelUpgradeEvent" />
+
     <bean id="mailSender" class="springbook.user.service.DummyMailSender" />
+
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
+    <aop:config>
+        <!-- pointcut이 여러 개일 경우 -->
+        <!--        <aop:pointcut id="transactionPointcut" expression="execution(* *..*ServiceImpl.upgrade*(..))" />-->
+        <!--        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut" />-->
+
+        <!-- pointcut이 한 개일 경우 -->
+        <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)" />
+    </aop:config>
+    <!-- 만들어둔 transactionAdvice를 이용하는 경우 -->
+        <bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice" >
+            <property name="transactionManager" ref="transactionManger" />
+        </bean>
+    <!-- transactionInterceptor를 이용하는 경우 -->
+<!--    <tx:advice id="transactionAdvice">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="get*" read-only="true"/>-->
+<!--            <tx:method name="*" />-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
 
     <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
         <!-- -1- dataSource를 빈으로 등록 -->
@@ -31,7 +84,7 @@
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
         <property name="driverClass" value="com.mysql.cj.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://localhost/testdb" />
+        <property name="url" value="jdbc:mysql://localhost/spring_study" />
         <property name="username" value="root" />
         <property name="password" value="min20617" />
     </bean>

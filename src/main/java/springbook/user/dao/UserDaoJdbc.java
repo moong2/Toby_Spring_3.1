@@ -1,6 +1,5 @@
 package springbook.user.dao;
 
-import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import jdk.nashorn.internal.scripts.JD;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.DataAccessException;

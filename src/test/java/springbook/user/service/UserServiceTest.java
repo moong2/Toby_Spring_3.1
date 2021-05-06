@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
@@ -206,19 +207,33 @@ public class UserServiceTest {
         try {
             this.testUserService.upgradeLevels();
             fail("TestUserServiceException expected");
-        } catch(TestUserServiceImplException e) {
+        } catch(TestUserServiceException e) {
         }
 
         checkLevel(users.get(1), false);
     }
-    static class TestUserService extends UserServiceImpl {
+
+//    jdk오류라면서 안된다. jdk와 spring version이 맞는데 왜이러는지 모르겠다.
+    @Test
+    public void readOnlyTransactionAttribute() {
+        testUserService.getAll();
+    }
+    static class TestUserServiceImpl extends UserServiceImpl {
         private String id = "moong3";
 
         @Override
         protected void upgradeLevel(User user) {
-            if(user.getId().equals(this.id)) throw new TestUserServiceImplException();
+            if(user.getId().equals(this.id)) throw new TestUserServiceException();
             super.upgradeLevel(user);
         }
+
+        @Override
+        public List<User> getAll() {
+            for(User user : super.getAll()) {
+                super.update(user);
+            }
+            return null;
+        }
     }
-    static class TestUserServiceImplException extends RuntimeException{}
+    static class TestUserServiceException extends RuntimeException{}
 }
