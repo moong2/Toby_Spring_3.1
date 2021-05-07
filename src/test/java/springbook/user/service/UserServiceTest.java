@@ -11,9 +11,16 @@ import org.springframework.dao.TransientDataAccessException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.NotTransactional;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import springbook.mail.MailSender;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
@@ -35,6 +42,8 @@ import static springbook.user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/test-applicationContext.xml")
+@Transactional
+@TransactionConfiguration(defaultRollback = true)
 public class UserServiceTest {
     @Autowired
     UserService userService;
@@ -154,6 +163,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Rollback
     public void add() {
         userDao.deleteAll();
 
@@ -200,6 +210,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Transactional(propagation= Propagation.NEVER)
     public void upgradeAllOrNothing() throws Exception{
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
@@ -236,4 +247,11 @@ public class UserServiceTest {
         }
     }
     static class TestUserServiceException extends RuntimeException{}
+
+    @Test
+    public void transactionSync() {
+        userService.deleteAll();
+        userService.add(users.get(0));
+        userService.add(users.get(1));
+    }
 }
