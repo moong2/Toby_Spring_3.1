@@ -11,10 +11,12 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
+import springbook.user.sqlservice.SqlService;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 public class UserDaoJdbc implements UserDao{
     // 1. 생성자를 이용하는 방법
@@ -58,6 +60,12 @@ public class UserDaoJdbc implements UserDao{
 //        this.jdbcContext = jdbcContext;
 //    }
 
+    private SqlService sqlService;
+
+    public void setSqlService(SqlService sqlService) {
+        this.sqlService = sqlService;
+    }
+
     private RowMapper<User> userMapper =
             new RowMapper<User>() {
                 @Override
@@ -78,7 +86,7 @@ public class UserDaoJdbc implements UserDao{
 
     public void add(final User user) throws DuplicateUserIdException{
         try {
-            this.jdbcTemplate.update("INSERT INTO users(id, name, password, email, level, login, recommend, lastUpgraded) values(?,?,?,?,?,?,?,?)", user.getId(), user.getName(), user.getPassword(), user.getEmail(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getLastUpgraded());
+            this.jdbcTemplate.update(this.sqlService.getSql("userAdd"), user.getId(), user.getName(), user.getPassword(), user.getEmail(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getLastUpgraded());
         } catch (DuplicateKeyException e) {
             throw new DuplicateUserIdException(e);
         }
@@ -111,12 +119,12 @@ public class UserDaoJdbc implements UserDao{
 //        return user;
 
         // 2) JdbcTemplate의 queryForObject()와 RowMapper 적용
-        return this.jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?",
+        return this.jdbcTemplate.queryForObject(this.sqlService.getSql("userGet"),
                 new Object[]{id}, this.userMapper);
     }
 
     public List<User> getAll() {
-        return this.jdbcTemplate.query("SELECT * FROM users ORDER BY id", this.userMapper);
+        return this.jdbcTemplate.query(this.sqlService.getSql("userGetAll"), this.userMapper);
     }
 
     public void deleteAll() {
@@ -133,7 +141,7 @@ public class UserDaoJdbc implements UserDao{
 //                }
 //        )
             // 2-2) JdbcTemplate의 내장 콜백을 사용하는 방식
-        this.jdbcTemplate.update("DELETE FROM users");
+        this.jdbcTemplate.update(this.sqlService.getSql("userDeleteAll"));
     }
 
     public int getCount() {
@@ -192,13 +200,13 @@ public class UserDaoJdbc implements UserDao{
 //        });
 
         // 3) JdbcTemplate 내장 콜백 사용
-        return this.jdbcTemplate.queryForInt("SELECT COUNT(*) FROM users");
+        return this.jdbcTemplate.queryForInt(this.sqlService.getSql("userGetCount"));
     }
 
     @Override
     public void update(User user1) throws DataAccessException{
         this.jdbcTemplate.update(
-                "update users set name = ?, password = ?, email = ?, level = ?, login = ?, recommend = ?, lastUpgraded = ? where id = ?", user1.getName(), user1.getPassword(), user1.getEmail(), user1.getLevel().intValue(), user1.getLogin(), user1.getRecommend(), user1.getLastUpgraded(), user1.getId()
+                this.sqlService.getSql("userUpdate"), user1.getName(), user1.getPassword(), user1.getEmail(), user1.getLevel().intValue(), user1.getLogin(), user1.getRecommend(), user1.getLastUpgraded(), user1.getId()
         );
     }
 }

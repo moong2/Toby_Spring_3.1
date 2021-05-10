@@ -82,6 +82,22 @@ http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
         <!-- -2- JdbcTemplate을 빈으로 등록 -->
         <property name="jdbcTemplate" ref="dataSource" />
 <!--        <property name="jdbcContext" ref="jdbcContext" />-->
+
+        <property name="sqlService" ref="sqlService" />
+    </bean>
+
+<!--    <bean id="sqlService" class="springbook.user.sqlservice.XmlSqlService"></bean>-->
+    <bean id="sqlService" class="springbook.user.sqlservice.SimpleSqlService">
+        <property name="sqlMap">
+            <map>
+                <entry key="userAdd" value="INSERT INTO users(id, name, password, email, level, login, recommend, lastUpgraded) values(?,?,?,?,?,?,?,?)" />
+                <entry key="userGet" value="SELECT * FROM users WHERE id = ?" />
+                <entry key="userGetAll" value="SELECT * FROM users ORDER BY id" />
+                <entry key="userDeleteAll" value="DELETE FROM users" />
+                <entry key="userGetCount" value="SELECT COUNT(*) FROM users" />
+                <entry key="userUpdate" value="update users set name = ?, password = ?, email = ?, level = ?, login = ?, recommend = ?, lastUpgraded = ? where id = ?" />
+            </map>
+        </property>
     </bean>
 
 <!--    <bean id="jdbcContext" class="springbook.user.dao.JdbcContext">-->
