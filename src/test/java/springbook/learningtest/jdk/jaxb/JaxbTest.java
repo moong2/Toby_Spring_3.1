@@ -10,6 +10,7 @@ import static org.junit.Assert.assertThat;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLType;
 import java.util.List;
@@ -21,7 +22,7 @@ public class JaxbTest {
         JAXBContext context = JAXBContext.newInstance(contextPath);
         Unmarshaller unmarshaller = context.createUnmarshaller();
 
-        Sqlmap sqlmap = (Sqlmap) unmarshaller.unmarshal(getClass().getResourceAsStream("sqlmap.xml"));
+        Sqlmap sqlmap = (Sqlmap) unmarshaller.unmarshal(new File("sqlmap-test.xml"));
 
         List<SqlType> sqlList = sqlmap.getSql();
 

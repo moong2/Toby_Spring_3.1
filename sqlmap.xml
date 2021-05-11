@@ -6,7 +6,7 @@
     <sql key="userAdd">INSERT INTO users(id, name, password, email, level, login, recommend, lastUpgraded) values(?,?,?,?,?,?,?,?)</sql>
     <sql key="userGet">SELECT * FROM users WHERE id = ?</sql>
     <sql key="userGetAll">SELECT * FROM users ORDER BY id</sql>
-    <sql key="userDeleteAll">DELETE FROM users"</sql>
+    <sql key="userDeleteAll">DELETE FROM users</sql>
     <sql key="userGetCount">SELECT COUNT(*) FROM users</sql>
     <sql key="userUpdate">update users set name = ?, password = ?, email = ?, level = ?, login = ?, recommend = ?, lastUpgraded = ? where id = ?</sql>
 </sqlmap>
