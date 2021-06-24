@@ -108,9 +108,12 @@
 <!--            </map>-->
 <!--        </property>-->
 <!--    </bean>-->
-
+<!--    <bean id="sqlService" class="springbook.user.sqlservice.OxmSqlService"></bean>-->
     <bean id="sqlReader" class="springbook.user.sqlservice.JaxbXmlSqlReader" />
     <bean id="sqlRegistry" class="springbook.user.sqlservice.HashMapSqlRegistry" />
+    <bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="contextPath" value="springbook.user.sqlservice.jaxb" />
+    </bean>
 
 <!--    <bean id="jdbcContext" class="springbook.user.dao.JdbcContext">-->
 <!--        <property name="dataSource" ref="dataSource" />-->
